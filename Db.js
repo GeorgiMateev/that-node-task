@@ -70,9 +70,9 @@ Db.prototype.getById = function(id, done) {
         }
         var item = findById(id, data);
         if(!item) {
-            done('Item not found');
+            return done('Item not found');
         }
-        done(null, item);
+        return done(null, item);
     });
 };
 
@@ -87,7 +87,7 @@ Db.prototype.updateById = function (id, item, done) {
     //See Db.prototype.getById
     this.getById(id, function (err, target) {
         if (err) {
-            done(err);
+            return done(err);
         }
         else {
             for (var prop in item) {
@@ -97,10 +97,10 @@ Db.prototype.updateById = function (id, item, done) {
             }
             self.writeItems(target, function (err, data) {
                 if (err) {
-                    done(err);
+                    return done(err);
                 }
                 else {
-                    done(null, target);
+                    return done(null, target);
                 }
             });
         }
@@ -112,8 +112,33 @@ Db.prototype.updateById = function (id, item, done) {
  * @param id
  * @param done
  */
-Db.prototype.deleteById = function(id, done){
-    done('Method deleteById in Db.js not implemented');
+Db.prototype.deleteById = function (id, done) {
+    var self = this;
+    this.readItems(function (err, data) {
+        if (err) {
+            return done(err);
+        }
+        else {
+            var deletedItem = findById(id, data);
+            if (!deletedItem) {
+                return done('Item not found');
+            };
+
+            var notDeleted = data.filter(function (item) {
+                return item.id !== id;
+            });
+
+            self.clear(function (err) {
+                if (err) return done(err);
+
+                self.writeItems(notDeleted, function (err, data) {
+                    if (err) return done(err);
+
+                    return done(null, deletedItem);
+                });
+            });
+        }
+    });
 };
 
 /**
@@ -124,14 +149,14 @@ Db.prototype.deleteAll = function (done) {
     var self = this;
     this.readItems(function (err, data) {
         if (err) {
-            done(err);
+            return done(err);
         }
         else {
             var count = data.length;
             self.clear(function (err) {
-                if (err) done(err);
+                if (err) return done(err);
 
-                done(null, count);
+                return done(null, count);
             });
         }
     });
