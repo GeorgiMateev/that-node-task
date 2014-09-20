@@ -25,7 +25,7 @@ Db.prototype.addItem = function(item, done){
         return done('Invalid item');
     }
     if(typeof done !== 'function') {
-        return done('Callback not supplied');
+        return done('Callback not supplied');////???????????????
     }
     /*
         Get the data, push the new item and writeItems it back.
@@ -82,9 +82,29 @@ Db.prototype.getById = function(id, done) {
  * @param item - item that will update the existing item. Id is preserved.
  * @param done
  */
-Db.prototype.updateById = function(id, item, done){
+Db.prototype.updateById = function (id, item, done) {
+    var self = this;
     //See Db.prototype.getById
-    done('Method updateById in Db.js not implemented');
+    this.getById(id, function (err, target) {
+        if (err) {
+            done(err);
+        }
+        else {
+            for (var prop in item) {
+                if (item.hasOwnProperty(prop) && target.hasOwnProperty(prop)) {
+                    target[prop] = item[prop];
+                }
+            }
+            self.writeItems(target, function (err, data) {
+                if (err) {
+                    done(err);
+                }
+                else {
+                    done(null, target);
+                }
+            });
+        }
+    });
 };
 
 /**
