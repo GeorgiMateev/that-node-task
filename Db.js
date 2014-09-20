@@ -120,8 +120,21 @@ Db.prototype.deleteById = function(id, done){
  * Deletes all items in the database. Callbacks with the count of the items that were deleted.
  * @param done - done(err, count)
  */
-Db.prototype.deleteAll = function(done){
-    done('Method deleteAll in Db.js not implemented');
+Db.prototype.deleteAll = function (done) {
+    var self = this;
+    this.readItems(function (err, data) {
+        if (err) {
+            done(err);
+        }
+        else {
+            var count = data.length;
+            self.clear(function (err) {
+                if (err) done(err);
+
+                done(null, count);
+            });
+        }
+    });
 };
 
 /**

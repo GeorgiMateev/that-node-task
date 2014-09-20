@@ -122,8 +122,16 @@ function setupRoutes(app) {
                 Result: (Number: count of the items)
              }
          */
-        next('routing.js: "Delete all items" route handler not implemented');
-
+        db.deleteAll(function(err, count){
+            if(err){
+                next(err);
+            }
+            else{
+                res.status(200).send({
+                    Result: count
+                });
+            }
+        });
     });
 
     app.delete('/db/:id', function (req, res, next) {
